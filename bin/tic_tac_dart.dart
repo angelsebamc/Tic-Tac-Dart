@@ -1,5 +1,6 @@
+import 'package:tic_tac_dart/menu.dart';
 import 'package:tic_tac_dart/tic_tac_dart.dart' as tic_tac_dart;
-import 'package:dart_console/dart_console.dart';
+import 'package:tic_tac_dart/menu.dart' as menu;
 
 
 void main() {
@@ -25,6 +26,7 @@ void main() {
   // console.resetColorAttributes();
 
   var ticTacDart = tic_tac_dart.TicTacDart();
+  var gameMenu = menu.Menu();
 
-  ticTacDart.printTable();
+  gameMenu.draw();
 }
