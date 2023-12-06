@@ -1,7 +1,11 @@
 import "dart:ffi";
 import "dart:io";
+import "dart:math";
 
 class TicTacDart {
+  final playerOneSymbol = 'x';
+  final playerTwoSymbol = 'o';
+
   String? playerPosition = "";
 
   List<String> playerOne = [];
@@ -18,11 +22,12 @@ class TicTacDart {
     ['1 3', '2 2', '3 1'],
   ];
 
-  bool playerOneTurn = false;
+  bool playerOneTurn = true;
   bool completed = false;
 
   int totalTurns = 4;
   List<List<String>> table = [];
+
   Map<String, String> positions = {
     '1 1': '0 0',
     '1 2': '0 2',
@@ -58,48 +63,79 @@ class TicTacDart {
     }
   }
 
+  bool positionIsInUse(String positionSelected) => [playerOneSymbol, playerTwoSymbol].contains(positionSelected);
+
+  void switchTurn() => playerOneTurn = !playerOneTurn;
+
+  String computerMove() {
+    String computerPosition = '';
+    var positionKeys = positions.keys as List<String>;
+
+    final random = Random();
+    int position = random.nextInt(positionKeys.length);
+
+    do {
+      computerPosition = positionKeys[position];
+    } while (positionIsInUse(computerPosition));
+
+    return computerPosition;
+  }
+
+  void selectPosition(List<String> player) {
+    totalTurns--;
+
+    String playerName = playerOneTurn ? 'Player 1' : 'Player 2';
+    String symbol = playerOneTurn ? playerOneSymbol : playerTwoSymbol;
+
+    String? findPosition = positions[playerPosition];
+
+    List<String> selectedPosition = findPosition!.split(' ');
+
+    int rowPosition = int.parse(selectedPosition[0]);
+    int columnPosition = int.parse(selectedPosition[1]);
+
+    String tablePosition = table[rowPosition][columnPosition];
+
+    if (positionIsInUse(tablePosition)) {
+      stdout.writeln("The position is already used. Selected another one");
+      return;
+    }
+
+    table[rowPosition][columnPosition] = symbol;
+    player.add(playerPosition!);
+    printTable();
+
+    if (player.length == 3) {
+      for (var element in winningPositions) {
+        if (element[0] == player[0] &&
+            element[1] == player[1] &&
+            element[2] == player[2]) {
+          completed = true;
+        }
+      }
+
+      if (completed) {
+        stdout.writeln("$playerName has won");
+        return;
+      }
+    }
+
+    switchTurn();
+  }
+
   void singlePlayer() {
     printTable();
     while (totalTurns > 0 && !completed) {
-      //if (playerOneTurn) {
-      stdout.writeln("Select a position: ");
-      playerPosition = stdin.readLineSync();
+      if (playerOneTurn) {
+        stdout.write("Select a position: ");
+        playerPosition = stdin.readLineSync();
 
-      totalTurns--;
-
-      String? findPosition = positions[playerPosition];
-
-      List<String> selectedPosition = findPosition!.split(' ');
-
-      int rowPosition = int.parse(selectedPosition[0]);
-      int columnPosition = int.parse(selectedPosition[1]);
-
-      String tablePosition = table[rowPosition][columnPosition];
-
-      if (['x', 'o'].contains(tablePosition)) {
-        stdout.writeln("The position is already used. Selected another one");
+        selectPosition(playerOne);
         return;
       }
 
-      table[rowPosition][columnPosition] = 'x';
-      playerOne.add(playerPosition!);
-      printTable();
-
-      if (playerOne.length == 3) {
-        for (var element in winningPositions) {
-          if (element[0] == playerOne[0] &&
-              element[1] == playerOne[1] &&
-              element[2] == playerOne[2]) {
-            completed = true;
-          }
-        }
-
-        if (completed) {
-          stdout.writeln("Player 1 has won");
-          return;
-        }
-      }
-      //}
+      playerPosition = computerMove();
+      selectPosition(playerTwo);
     }
   }
 }
