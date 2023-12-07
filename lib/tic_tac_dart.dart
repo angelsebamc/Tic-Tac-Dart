@@ -25,7 +25,7 @@ class TicTacDart {
   bool playerOneTurn = true;
   bool completed = false;
 
-  int totalTurns = 4;
+  int totalTurns = 9;
   List<List<String>> table = [];
 
   Map<String, String> positions = {
@@ -63,13 +63,14 @@ class TicTacDart {
     }
   }
 
-  bool positionIsInUse(String positionSelected) => [playerOneSymbol, playerTwoSymbol].contains(positionSelected);
+  bool positionIsInUse(String positionSelected) =>
+      [playerOneSymbol, playerTwoSymbol].contains(positionSelected);
 
   void switchTurn() => playerOneTurn = !playerOneTurn;
 
   String computerMove() {
     String computerPosition = '';
-    var positionKeys = positions.keys as List<String>;
+    var positionKeys = positions.keys.toList();
 
     final random = Random();
     int position = random.nextInt(positionKeys.length);
@@ -82,8 +83,6 @@ class TicTacDart {
   }
 
   void selectPosition(List<String> player) {
-    totalTurns--;
-
     String playerName = playerOneTurn ? 'Player 1' : 'Player 2';
     String symbol = playerOneTurn ? playerOneSymbol : playerTwoSymbol;
 
@@ -103,9 +102,13 @@ class TicTacDart {
 
     table[rowPosition][columnPosition] = symbol;
     player.add(playerPosition!);
+    totalTurns--;
     printTable();
 
     if (player.length == 3) {
+      player.sort();
+      print(player);
+
       for (var element in winningPositions) {
         if (element[0] == player[0] &&
             element[1] == player[1] &&
@@ -119,7 +122,6 @@ class TicTacDart {
         return;
       }
     }
-
     switchTurn();
   }
 
@@ -131,11 +133,10 @@ class TicTacDart {
         playerPosition = stdin.readLineSync();
 
         selectPosition(playerOne);
-        return;
+      } else {
+        playerPosition = computerMove();
+        selectPosition(playerTwo);
       }
-
-      playerPosition = computerMove();
-      selectPosition(playerTwo);
     }
   }
 }
